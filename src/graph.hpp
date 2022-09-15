@@ -12,7 +12,7 @@ using std::filesystem::path;
 using std::string;
 
 class docgraph {
-  vector<document> docs; 
+  vector<shared_ptr<document>> docs; 
   public:
     docgraph() = default;
 
@@ -21,11 +21,11 @@ class docgraph {
     /** Print information on all docs in the graph.
      */
     void printDocs() const {
-      for( const document& doc : docs ){
-        doc.printInfo();
+      for( auto& doc : docs ){
+        doc->printInfo();
       }
     }
 
-   vector<shared_ptr<document>> getDoc(string) const; 
+   vector<shared_ptr<document>> getDoc(string); 
 };
 
