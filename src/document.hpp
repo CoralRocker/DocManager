@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <filesystem>
+#include <sys/types.h>
 #include <vector>
 #include <iostream>
 
@@ -11,10 +12,46 @@ using std::string;
 using std::vector;
 using std::filesystem::path;
 
+/**
+ * @brief List of all subsystems in REGS
+ *
+ * @author Gaultier Delbarre
+ * @date 9/15/2022
+ */
+enum class SUBSYSTEMS {
+  SYSTEMS,
+  GOES,
+  QFH,
+  YAGI,
+  ADSB,
+  ATC
+};
+
+inline string to_string(SUBSYSTEMS sys) {
+  switch(sys) {
+    case SUBSYSTEMS::SYSTEMS:
+      return "Systems";
+    case SUBSYSTEMS::GOES:
+      return "GOES";
+    case SUBSYSTEMS::QFH:
+      return "QFH";
+    case SUBSYSTEMS::YAGI:
+      return "Yagi";
+    case SUBSYSTEMS::ADSB:
+      return "ADS-B";
+    case SUBSYSTEMS::ATC:
+      return "ATC";
+    default:
+      return "INVALID SUBSYSTEM";
+  }
+}
 
 class document {
   vector<shared_ptr<document>> references;
   path file;
+  SUBSYSTEMS subsys;
+  unsigned revision;
+  string document_name;
   public:
     document(path, vector<shared_ptr<document>> = {});
 
@@ -23,8 +60,13 @@ class document {
     document& operator=(const document&) = default;
     document& operator=(document&&) = default;
 
+    bool getFileNameInfo();
 
     string docname() const {
+      return document_name;
+    }
+
+    string filename() const {
       return file.filename();
     }
 
@@ -34,7 +76,7 @@ class document {
     bool addReference(shared_ptr<document> doc);
 
     bool operator==(const document& other) const {
-      return other.docname() == docname();
+      return other.docname() == docname() && other.revision == revision;
     }
 
 };
