@@ -27,6 +27,16 @@ class docgraph {
       }
     }
 
-   vector<shared_ptr<document>> getDoc(string); 
+    vector<shared_ptr<document>> getDoc(string); 
+
+    size_t size() const {
+      return docs.size();
+    }
+
+    bool empty() const {
+      return docs.empty();
+    }
+
+    const shared_ptr<document> getChild(size_t) const;
 };
 

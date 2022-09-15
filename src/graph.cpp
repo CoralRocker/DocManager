@@ -2,6 +2,7 @@
 #include "document.hpp"
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 #include <algorithm>
 
@@ -47,3 +48,6 @@ vector<shared_ptr<document>> docgraph::getDoc(string docname) {
   return ret;
 }
 
+const shared_ptr<document> docgraph::getChild(size_t c) const {
+  return docs.at(c);
+}
