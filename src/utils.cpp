@@ -54,7 +54,7 @@ std::optional<path> unzip_file(path zipfile, string subfile) {
 
   path tmpdir = fs::temp_directory_path();
 
-  string command = "unzip -o \"" + zipfile.string() + "\" \"" + subfile + "\" -d " + tmpdir.string();
+  string command = "unzip -o \"" + zipfile.string() + "\" \"" + subfile + "\" -d " + tmpdir.string() + " > /dev/null";
 
   system(command.c_str());
 
