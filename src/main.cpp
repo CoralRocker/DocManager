@@ -8,12 +8,9 @@
 #include <optional>
 
 #include "graph.hpp"
-
+#include "utils.hpp"
 
 
 int main() {
-  docgraph testdir;
-  testdir.scan_dir("test_dir");
-
-  testdir.printDocs();
+  unzip_file("test_dir/00-Systems/REGS-00-R1-build plan.docx", "word/document.xml");
 }
