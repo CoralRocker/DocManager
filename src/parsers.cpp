@@ -7,6 +7,9 @@
 #include <libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 #include <libxml2/libxml/xmlstring.h>
+#include <optional>
+#include <vector>
+#include <cstring>
 
 /**
  * @brief A basic RAII wrapper for the xmlChar* strings
@@ -44,12 +47,22 @@ class xmlString {
       return ptr;
     }
 
-    operator xmlChar* () {
+    operator xmlChar* () const {
       return (xmlChar*)ptr;
     }
 
-    operator string () {
+    operator string () const {
       return string((char*)ptr);
+    }
+
+    xmlString& operator+=(const xmlString other) {
+      string me((char*)ptr);
+      xmlFree(ptr);
+      me += other;
+      ptr = (xmlChar*)xmlMemMalloc(me.size() + 1);
+      memcpy(ptr, me.data(), me.size()+1);
+      
+      return *this;
     }
 
     bool contains(string s) const {
@@ -88,6 +101,54 @@ std::optional<xmlNodePtr> getInnerTextRun(xmlNodePtr node) {
 
 
   return std::nullopt;
+}
+
+/**
+ * @brief Get all text nodes that are children of the given node.
+ *
+ * @author Gaultier Delbarre
+ * @date 9/15/2022
+ *
+ * @param node The node to search through
+ * @returns Nothing if no <w:t> found, or a vector of all text nodes in the order they occur
+ */
+std::optional<std::vector<xmlNodePtr>> getAllInnerTextRun(xmlNodePtr node) {
+  if( !xmlStrcmp(node->name, (const xmlChar*) "t")) {
+    return std::vector<xmlNodePtr>{node};
+  }
+
+  std::vector<xmlNodePtr> texts;
+  node = node->children;
+  while( node != NULL ){
+    auto ret = getAllInnerTextRun(node);
+    if( ret )
+      texts.insert(texts.end(), ret->begin(), ret->end());
+    node = node->next;
+  }
+  if( texts.empty() ) return std::nullopt;
+
+
+  return texts;
+}
+
+/**
+ * @brief Takes a vector of <w:t> nodes and concatenates their contents into one string
+ *
+ * @author Gaultier Delbarre
+ * @date 9/15/2022
+ *
+ * @param doc The document pointer
+ * @param nodes Vector of <w:t> node pointers
+ * @returns the created string
+ */
+string concatTextNodes(xmlDocPtr doc, std::vector<xmlNodePtr> &nodes) {
+  string result;
+  for( auto node : nodes ){
+    xmlString str = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
+    result += str;
+  }
+
+  return result;
 }
 
 /**
@@ -147,14 +208,22 @@ vector<string> document::parseReferences<WORD_XML>() const {
   // Find reference node
   xmlNodePtr ref = NULL;
   for( auto it = paragraphs.rbegin(); it != paragraphs.rend(); ++it ){
-    auto txtnode = getInnerTextRun(*it);
-    if( txtnode ){
-      xmlString str = xmlNodeListGetString(doc, (*txtnode)->xmlChildrenNode, 1);
-      if( str.contains("Reference") ){
+    auto nodes = getAllInnerTextRun(*it);
+    if( nodes ){
+      string txt = concatTextNodes(doc, *nodes);
+      if( txt.find("Reference") != string::npos ) {
         ref = *it;
         break;
       }
-    }    
+    }
+    // auto txtnode = getInnerTextRun(*it);
+    // if( txtnode ){
+    //   xmlString str = xmlNodeListGetString(doc, (*txtnode)->xmlChildrenNode, 1);
+    //   if( str.contains("Reference") ){
+    //     ref = *it;
+    //     break;
+    //   }
+    // }    
   }
   
   // Reference node not found
@@ -168,14 +237,22 @@ vector<string> document::parseReferences<WORD_XML>() const {
   vector<string> references;
 
   while( ref != NULL ){
-    auto txtnode = getInnerTextRun(ref);
-    if( txtnode ){
-      xmlString str = xmlNodeListGetString(doc, (*txtnode)->xmlChildrenNode, 1);
-      references.push_back(str);
+    auto nodes = getAllInnerTextRun(ref);
+    if( nodes ){
+      string txt = concatTextNodes(doc, *nodes);
+      references.push_back(txt);
     }else{
-      // End of text nodes in paragraphs, break;
       break;
     }
+
+    // auto txtnode = getInnerTextRun(ref);
+    // if( txtnode ){
+    //   xmlString str = xmlNodeListGetString(doc, (*txtnode)->xmlChildrenNode, 1);
+    //   references.push_back(str);
+    // }else{
+    //   // End of text nodes in paragraphs, break;
+    //   break;
+    // }
     ref = ref->next;
   }
 
