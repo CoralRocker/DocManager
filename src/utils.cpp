@@ -61,10 +61,7 @@ std::optional<path> unzip_file(path zipfile, string subfile) {
   path enddir = tmpdir / subfile;
 
   if( !fs::exists(enddir) )
-    std::cerr << "Unzip failed!" << std::endl;
-  else
-    std::cout << "Unzip successfull" << std::endl;
+    return std::nullopt;
 
-  std::cout << enddir << std::endl;
-  return std::nullopt;
+  return enddir;
 }
