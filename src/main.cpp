@@ -11,12 +11,18 @@
 #include "graph.hpp"
 #include "utils.hpp"
 
+using std::endl, std::cout;
 
 int main() {
   docgraph testdir;
   testdir.scan_dir("test_dir");
   
-  for( auto doc : testdir.getDoc("REGS")) {
-    doc->parseReferences<DOCTYPE::WORD_XML>();
+  for( auto doc : testdir.getDoc("REGS") ){
+    auto refs = doc->parseReferences<DOCTYPE::WORD_XML>();
+    cout << "References for " << doc->docname() << ":" << endl;
+    for( auto ref : refs ){
+      cout << "\t" << ref << endl;
+    };
   }
+
 }
