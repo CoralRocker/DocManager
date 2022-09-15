@@ -18,6 +18,12 @@ class document {
   public:
     document(path, vector<shared_ptr<document>> = {});
 
+    document(const document&) = default;
+    document(document&&) = default;
+    document& operator=(const document&) = default;
+    document& operator=(document&&) = default;
+
+
     string docname() const {
       return file.filename();
     }

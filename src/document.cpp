@@ -15,8 +15,8 @@
  */                                                                                       
 document::document(path file, vector<shared_ptr<document>> references)                 
   : references(references), file(file) {                                                  
-  if( std::filesystem::is_regular_file(file) )                                               
-    throw std::invalid_argument("File path for document must be a regular file!");     
+  if( !std::filesystem::is_regular_file(file) )                                            
+    throw std::invalid_argument("File path for document must be a regular file!: "+file.string());     
 }
 
 /**
