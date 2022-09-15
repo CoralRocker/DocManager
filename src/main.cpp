@@ -15,7 +15,9 @@ int main() {
   docgraph testdir;
   testdir.scan_dir("test_dir");
 
-  testdir.getDoc("REGS");
+  testdir.printDocs();
+
+  auto vec = testdir.getDoc("Shir");
   testdir.getDoc(" is ");
   testdir.getDoc("GOE");
 }
