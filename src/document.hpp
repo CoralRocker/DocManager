@@ -46,6 +46,16 @@ inline string to_string(SUBSYSTEMS sys) {
   }
 }
 
+/**
+ * @brief Type of documents which can be parsed
+ *
+ * @author Gaultier Delbarre
+ * @date 9/15/2022
+ */
+enum DOCTYPE { 
+  WORD_XML ///< .docx documents
+};
+
 class document {
   vector<shared_ptr<document>> references;
   path file;
@@ -69,6 +79,9 @@ class document {
     string filename() const {
       return file.filename();
     }
+
+    template<DOCTYPE T>
+    vector<string> parseReferences() const;
 
     void printInfo() const;
 
