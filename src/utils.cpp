@@ -1,5 +1,11 @@
 #include "utils.hpp"
 
+#include <cstdlib>
+#include <filesystem>
+#include <optional>
+#include <stdexcept>
+#include <iostream>
+namespace fs = std::filesystem;
 
 /**
  * @brief Search for the substring in the view, returning the number of equal characters, if any.
@@ -30,3 +36,35 @@ std::optional<int> substr_in(std::string_view view, std::string_view cont) {
   }
 }
 
+
+/**
+ * @brief Unzip the given file from within a zip archive
+ *
+ * @author Gaultier Delbarre
+ * @date 9/15/2022
+ *
+ * @param zipfile The path to the zip file to unzip
+ * @param subfile The file path within the zipfile to unzip. Leave empty for the whole zip
+ * @returns Nothing if the subfile doesn't exist.
+ * @throws invalid_argument if the zipfile doesn't exist.
+ */
+std::optional<path> unzip_file(path zipfile, string subfile) {
+  if( !fs::exists(zipfile) )
+    throw std::invalid_argument("Unzip error: " + zipfile.string() + " doesn't exist");
+
+  path tmpdir = fs::temp_directory_path();
+
+  string command = "unzip -o \"" + zipfile.string() + "\" \"" + subfile + "\" -d " + tmpdir.string();
+
+  system(command.c_str());
+
+  path enddir = tmpdir / subfile;
+
+  if( !fs::exists(enddir) )
+    std::cerr << "Unzip failed!" << std::endl;
+  else
+    std::cout << "Unzip successfull" << std::endl;
+
+  std::cout << enddir << std::endl;
+  return std::nullopt;
+}
