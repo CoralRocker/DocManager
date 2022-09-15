@@ -26,8 +26,8 @@ using std::shared_ptr;
  * @returns Nothing if a match of at least length 3 is not found, else the number of contiguous characters matched.
  */
 std::optional<int> substr_in(std::string_view view, std::string_view cont) {
-  if( cont.empty() ) throw std::invalid_argument("Substring to search for cannot be empty!");
-  if( cont.size() <= 3 ) return (view.find(cont) != string::npos) ? std::make_optional(cont.size()) : std::nullopt;
+  if( cont.size() == 3 ) return (view.find(cont) != string::npos) ? std::make_optional(cont.size()) : std::nullopt;
+  if( cont.empty() || cont.size() < 3) throw std::invalid_argument("Substring to search for cannot be empty or < 3!: " + string(cont));
 
   if( view.find(cont) == string::npos ){
     auto ret = substr_in(view, cont.substr(0, cont.size()-1));
@@ -99,10 +99,10 @@ class docgraph {
      */
     vector<shared_ptr<document>> getDoc(string docname) {
       for( document doc : docs ){
-        std::string_view name = doc.docname();
+        string name = doc.docname();
         auto pos = substr_in(name, docname);
         if( pos )
-          cout << "Found document with substr \"" << docname << "\": " << *pos << endl;
+          cout << "Found document with substr \"" << docname << "\": " << name << " " << *pos << endl;
       }
       return {};
     }
@@ -112,5 +112,8 @@ class docgraph {
 int main() {
   docgraph testdir;
   testdir.scan_dir("test_dir");
-  testdir.printDocs();
+
+  testdir.getDoc("REGS");
+  testdir.getDoc(" is ");
+  testdir.getDoc("GOE");
 }
