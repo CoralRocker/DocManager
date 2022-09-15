@@ -1,2 +1,7 @@
+# Binary Files 
 *.out
 *.o
+docmng
+
+# Build dir
+build/
