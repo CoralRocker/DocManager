@@ -8,7 +8,8 @@
 void docgraph::scan_dir(path dir) {
   for(const std::filesystem::directory_entry &ent : std::filesystem::recursive_directory_iterator(dir) ){
     if( ent.is_regular_file() && !ent.is_directory() ){
-      docs.push_back(shared_ptr<document>(new document(ent.path())));
+      path p = ent.path();
+      docs.push_back(shared_ptr<document>(new document(p)));
     }
   }
 
@@ -27,7 +28,7 @@ vector<shared_ptr<document>> docgraph::getDoc(string docname) {
   using Tsort = std::pair<shared_ptr<document>, int>;
   vector<Tsort> sorted;
   for(auto doc : docs ){
-    string name = doc->docname();
+    string name = doc->filename();
     int pos = substr_in(name, docname).value_or(0);
     sorted.push_back(std::make_pair(doc, pos));
   }

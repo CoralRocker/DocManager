@@ -23,6 +23,7 @@ class docgraph {
     void printDocs() const {
       for( auto& doc : docs ){
         doc->printInfo();
+        std::cout << std::endl;
       }
     }
 
