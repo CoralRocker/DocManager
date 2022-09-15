@@ -7,10 +7,16 @@
 #include <string_view>
 #include <optional>
 
+#include "document.hpp"
 #include "graph.hpp"
 #include "utils.hpp"
 
 
 int main() {
-  unzip_file("test_dir/00-Systems/REGS-00-R1-build plan.docx", "word/document.xml");
+  docgraph testdir;
+  testdir.scan_dir("test_dir");
+  
+  for( auto doc : testdir.getDoc("REGS")) {
+    doc->parseReferences<DOCTYPE::WORD_XML>();
+  }
 }
