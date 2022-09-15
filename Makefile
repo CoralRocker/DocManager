@@ -10,7 +10,7 @@ CXXFLAGS= --std=c++20 -Wall -Werror -pedantic -ggdb -O0
 LDFLAGS := 
 
 # What to name the output executable
-TARGET := a.out
+TARGET := docmng
 
 # Name of the source code directory
 SRC_DIR := src
@@ -43,7 +43,7 @@ clean:
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo Building $<
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) $< -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Link the target executable
 $(TARGET): $(OBJS)
