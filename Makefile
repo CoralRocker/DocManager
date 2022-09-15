@@ -7,7 +7,7 @@ CXXFLAGS= --std=c++20 -Wall -Werror -pedantic -ggdb -O0
 
 # Flags to give to linker.
 # Add or remove flags as needed
-LDFLAGS := 
+LDFLAGS := -lxml2
 
 # What to name the output executable
 TARGET := docmng
