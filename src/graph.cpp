@@ -8,8 +8,10 @@
 
 void docgraph::scan_dir(path dir) {
   for(const std::filesystem::directory_entry &ent : std::filesystem::recursive_directory_iterator(dir) ){
-    if( ent.is_regular_file() && !ent.is_directory() ){
+    if( ent.is_regular_file() ){
       path p = ent.path();
+      // Dont allow hidden files. 
+      if( p.filename().string()[0] == '.' ) continue;
       docs.push_back(shared_ptr<document>(new document(p)));
     }
   }
