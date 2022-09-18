@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <sys/types.h>
 #include <vector>
+#include <algorithm>
 #include <iostream>
 
 using std::shared_ptr;
@@ -58,6 +59,7 @@ enum DOCTYPE {
 
 class document {
   vector<shared_ptr<document>> references;
+  vector<string> unfound_references;
   path file;
   SUBSYSTEMS subsys;
   unsigned revision;
@@ -85,8 +87,16 @@ class document {
 
     void printInfo() const;
 
-    bool addReference(document& doc);
     bool addReference(shared_ptr<document> doc);
+    void addReference(string ref){
+      std::transform(ref.begin(), ref.end(), ref.begin(), ::tolower);
+      unfound_references.push_back(ref);
+    }
+
+    bool hasReference(shared_ptr<document>) const;
+    bool hasReference(const document*) const;
+
+    bool hasUnfoundReference(string) const;
 
     bool operator==(const document& other) const {
       return other.docname() == docname() && other.revision == revision;
