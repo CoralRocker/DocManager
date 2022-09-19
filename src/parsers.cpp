@@ -10,6 +10,7 @@
 #include <optional>
 #include <vector>
 #include <cstring>
+#include <functional>
 
 /**
  * @brief A basic RAII wrapper for the xmlChar* strings
@@ -112,22 +113,24 @@ std::optional<xmlNodePtr> getInnerTextRun(xmlNodePtr node) {
  * @param node The node to search through
  * @returns Nothing if no <w:t> found, or a vector of all text nodes in the order they occur
  */
-std::optional<std::vector<xmlNodePtr>> getAllInnerTextRun(xmlNodePtr node) {
-  if( !xmlStrcmp(node->name, (const xmlChar*) "t")) {
-    return std::vector<xmlNodePtr>{node};
-  }
+std::optional<std::vector<xmlNodePtr>> getAllInnerTextRun(xmlNodePtr root) {
 
-  std::vector<xmlNodePtr> texts;
-  node = node->children;
-  while( node != NULL ){
-    auto ret = getAllInnerTextRun(node);
-    if( ret )
-      texts.insert(texts.end(), ret->begin(), ret->end());
-    node = node->next;
-  }
+  std::vector<xmlNodePtr> texts = {};
+  
+  std::function<void(xmlNodePtr, decltype(texts)&)> recursive = [&recursive](xmlNodePtr node, vector<xmlNodePtr> &out) {
+    if( node->name[0] == 't' && node->name[1] == 0x00 ) {
+      out.push_back(node);
+    }
+
+    node = node->children;
+    while( node != NULL ){
+      recursive(node, out);
+      node = node->next;
+    }
+  };
+
+  recursive(root, texts);
   if( texts.empty() ) return std::nullopt;
-
-
   return texts;
 }
 
