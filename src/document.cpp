@@ -81,6 +81,8 @@ bool document::getFileNameInfo() {
  * @brief Add a reference to a document, if it's not already there.
  *
  * Removes the reference from unfound_references if it's there.
+ * References are directional. The reference being added does not 
+ * refer to *this.
  *
  * @author Gaultier Delbarre
  * @date 9/15/2022
@@ -100,10 +102,6 @@ bool document::addReference(shared_ptr<document> doc) {
 
     }
     
-    if( !doc->hasReference(this) ){
-      
-    }
-
     return true;
   }
   return false;
