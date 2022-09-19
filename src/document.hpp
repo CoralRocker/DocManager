@@ -8,10 +8,14 @@
 #include <algorithm>
 #include <iostream>
 
+
 using std::shared_ptr;
 using std::string;
 using std::vector;
 using std::filesystem::path;
+
+// Declare graph here. 
+class docgraph;
 
 /**
  * @brief List of all subsystems in REGS
@@ -64,7 +68,13 @@ class document {
   SUBSYSTEMS subsys;
   unsigned revision;
   string document_name;
+
+  friend class docgraph;
   public:
+    
+    // Used for DFS/BFS algorithms
+    bool visited;
+    
     document(path, vector<shared_ptr<document>> = {});
 
     document(const document&) = default;
