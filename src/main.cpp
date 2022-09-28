@@ -55,7 +55,7 @@ int main() {
     auto refs = doc->parseReferences<DOCTYPE::WORD_XML>();
   }
 
-  testdir.parseAndConnect();
+  // testdir.parseAndConnect();
   
   static bool close = false;
 
