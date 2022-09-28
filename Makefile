@@ -3,11 +3,11 @@ CXX=g++
 
 # Flags to give to compiler.
 # Add or remove flags as needed
-CXXFLAGS= --std=c++20 -Wall -Werror -pedantic -ggdb -O0
+CXXFLAGS= --std=c++20 -Wall -Werror -pedantic -ggdb -O0 -Ilib/ -Ilib/backends/
 
 # Flags to give to linker.
 # Add or remove flags as needed
-LDFLAGS := -lxml2
+LDFLAGS := -lxml2 -Llib/ -Llib/backends/ -limgui -limpl_glfw_opengl2 -lglfw -lGL
 
 # What to name the output executable
 TARGET := docmng
