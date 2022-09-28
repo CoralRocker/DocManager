@@ -5,6 +5,7 @@
 #include <optional>
 #include <stdexcept>
 #include <iostream>
+#include <string>
 namespace fs = std::filesystem;
 
 /**
@@ -16,24 +17,38 @@ namespace fs = std::filesystem;
  * @date 9/15/2022
  *
  * @param view The string_view to search in
- * @param cont The string to search for. Length must be at least 3.
+ * @param cont The string to search for. Length must be at least minmatch.
+ * @param minmatch The length of match to return at minimum.
  * @returns Nothing if a match of at least length 3 is not found, else the number of contiguous characters matched.
  */
-std::optional<int> substr_in(std::string_view view, std::string_view cont) {
-  if( cont.size() == 3 ) return (view.find(cont) != string::npos) ? std::make_optional(cont.size()) : std::nullopt;
-  if( cont.empty() || cont.size() < 3) throw std::invalid_argument("Substring to search for cannot be empty or < 3!: " + string(cont));
+std::optional<int> substr_in(std::string_view view, std::string_view cont, decltype(string::npos) minmatch) {
 
-  if( view.find(cont) == string::npos ){
-    auto ret = substr_in(view, cont.substr(0, cont.size()-1));
-    if( !ret ){
-      ret = substr_in(view, cont.substr(1));
-    }
+  // If we're at the recursive base case
+  if( cont.size() == minmatch ) return (view.find(cont) != string::npos) ? std::make_optional(cont.size()) : std::nullopt;
 
+  // Misuse of the function
+  if( cont.empty() || cont.size() < minmatch) throw std::invalid_argument("Substring to search for cannot be empty or < " + std::to_string(minmatch) + "!: " + string(cont));
+
+  auto ret = substr_in(view, cont.substr(0, cont.size()-1), minmatch);
+  if( !ret )
+    return {};
+  else if( *ret == (int)cont.size()-1 )
+    return (view.find(cont) != string::npos) ? std::make_optional(cont.size()) : *ret;
+  else
     return ret;
 
-  } else {
-    return cont.size();
-  }
+  // if( view.find(cont) == string::npos ){
+  //   auto ret = substr_in(view, cont.substr(0, cont.size()-1), minmatch);
+  //   if( !ret ){
+  //     ret = substr_in(view, cont.substr(1), minmatch);
+  //   }
+
+  //   return ret;
+
+  // } else {
+  //   return cont.size();
+  // }
+
 }
 
 

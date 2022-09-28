@@ -79,7 +79,25 @@ class docgraph {
       }
     }
 
-    vector<shared_ptr<document>> getDoc(string); 
+    // Parse Each Document's References And Connect Them To Each Other
+    void parseAndConnect();
+
+    // Standard Iterators Over All Documents
+    decltype(docs)::iterator begin() { return docs.begin(); }
+    decltype(docs)::iterator end() { return docs.end(); }
+    decltype(docs)::const_iterator cbegin() { return docs.cbegin(); }
+    decltype(docs)::const_iterator cend() { return docs.cend(); }
+    
+    decltype(docs)::reverse_iterator rbegin() { return docs.rbegin(); }
+    decltype(docs)::reverse_iterator rend() { return docs.rend(); }
+    decltype(docs)::const_reverse_iterator crbegin() { return docs.crbegin(); }
+    decltype(docs)::const_reverse_iterator crend() { return docs.crend(); }
+
+    // DFS And BFS Iterators
+    // TODO
+
+
+    vector<shared_ptr<document>> getDoc(string, decltype(string::npos)=3); 
 
     size_t size() const {
       return docs.size();

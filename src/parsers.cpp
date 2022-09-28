@@ -11,6 +11,7 @@
 #include <vector>
 #include <cstring>
 #include <functional>
+#include <regex>
 
 /**
  * @brief A basic RAII wrapper for the xmlChar* strings
@@ -66,7 +67,7 @@ class xmlString {
       return *this;
     }
 
-    bool contains(string s) const {
+    bool contains(const string s) const {
       string srch((char*)ptr);
       
       return srch.find(s) != string::npos;
@@ -259,6 +260,20 @@ vector<string> document::parseReferences<WORD_XML>() const {
     ref = ref->next;
   }
 
+  // Clean Up Reference Strings
+  const std::regex REFCLEAN("^(\\[\\d+\\])?\\s*(.+)");
+  std::smatch m;
+  auto it = references.begin();
+  while( it != references.end() ){
+    if( std::regex_match(*it, m, REFCLEAN) ){
+
+      *it = m[2];
+
+      it++;
+    }else{
+      it = references.erase(it);
+    }
+  }
 
   return references;
 }
