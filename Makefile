@@ -18,6 +18,9 @@ SRC_DIR := src
 # Name of the build directory to place object files in
 BUILD_DIR := build
 
+BACKEND := lib/backends/libimpl_glfw_opengl2.a
+IMGUI := lib/libimgui.a
+
 #######################################
 # DON'T EDIT ANYTHING PAST THIS POINT #
 #######################################
@@ -29,15 +32,19 @@ SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 # Sets the default target 
-.PHONY: all
-all: $(TARGET)
+.PHONY: all clean cleanall 
+all: $(BACKEND) $(IMGUI) $(TARGET)
 	
+
 # Sets the clean target
-.PHONY: clean
 clean:
 	@echo "Removing all object files ($(OBJS)) and the target executable ($(TARGET))"
+	@rm $(OBJS) $(TARGET)
 
-	rm $(OBJS) $(TARGET)
+cleanall: clean
+	@echo "Additionally removing compiled backend libraries"
+	@rm lib/libimgui.a lib/backends/*.a
+
 
 # Auto-build the sources
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
@@ -55,14 +62,14 @@ $(TARGET): $(OBJS)
 # BACKEND LIBRARY COMPILATION         #
 #######################################
 
-impl_glfw_opengl2: lib/backends/imgui_impl_opengl2.cpp lib/backends/imgui_impl_glfw.cpp
+lib/backends/libimpl_glfw_opengl2.a: lib/backends/imgui_impl_opengl2.cpp lib/backends/imgui_impl_glfw.cpp
 	@echo Building GLFW/OpenGL2 Backend Library
 	@$(CXX) $(CXXFLAGS) -c $^
-	@ar r lib/backends/lib$@.a *.o
+	@ar r $@ *.o
 	@rm *.o
 
-imgui: lib/imgui.cpp lib/imgui_draw.cpp lib/imgui_tables.cpp lib/imgui_widgets.cpp
+lib/libimgui.a: lib/imgui.cpp lib/imgui_draw.cpp lib/imgui_tables.cpp lib/imgui_widgets.cpp
 	@echo Building Dear ImGui Library
 	@$(CXX) $(CXXFLAGS) -c $^
-	@ar r lib/lib$@.a *.o
+	@ar r $@ *.o
 	@rm *.o
