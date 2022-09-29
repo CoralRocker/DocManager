@@ -1,6 +1,7 @@
 # Binary Files 
 *.out
 *.o
+*.a
 docmng
 
 # Build dir
