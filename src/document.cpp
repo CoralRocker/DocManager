@@ -1,5 +1,6 @@
 #include "document.hpp"
 #include <algorithm>
+#include <bits/types/FILE.h>
 #include <cctype>
 #include <filesystem>
 #include <memory>
@@ -143,4 +144,30 @@ bool document::hasUnfoundReference(string doc) const {
       return true;
 
   return false;
+}
+
+/**
+ * @brief Parse the document and save to internal memory. Do nothing if extension/parser pair
+ * unknown.
+ *
+ * @author Gaultier Delbarre
+ * @date 9/28/2022
+ */
+void document::parseReferences() {
+  string ext = file.extension();
+
+  DOCTYPE dtype = INVALID;
+
+  if( ext == ".docx" )
+    dtype = WORD_XML;
+
+  switch(dtype) {
+    case WORD_XML:
+      parsed_references = parseReferences<WORD_XML>();
+      break;
+    case INVALID:
+    default:
+      break;
+  }
+
 }

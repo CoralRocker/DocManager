@@ -58,12 +58,14 @@ inline string to_string(SUBSYSTEMS sys) {
  * @date 9/15/2022
  */
 enum DOCTYPE { 
-  WORD_XML ///< .docx documents
+  WORD_XML, ///< .docx documents
+  INVALID,  /// All unparseable documents
 };
 
 class document {
   vector<shared_ptr<document>> references;
   vector<string> unfound_references;
+  vector<string> parsed_references;
   path file;
   SUBSYSTEMS subsys;
   unsigned revision;
@@ -94,6 +96,12 @@ class document {
 
     template<DOCTYPE T>
     vector<string> parseReferences() const;
+
+    const vector<string>& getParsedReferences() const {
+      return parsed_references;
+    }
+
+    void parseReferences();
 
     void printInfo() const;
 
