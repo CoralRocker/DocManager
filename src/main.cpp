@@ -21,6 +21,8 @@
 #include "imgui_impl_opengl2.h"
 #include <GLFW/glfw3.h>
 
+using std::cout, std::endl;
+
 static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
@@ -51,9 +53,7 @@ int main() {
   docgraph testdir;
   testdir.scan_dir("test_dir");
   
-  for( auto doc : testdir.getDoc("REGS") ){
-    auto refs = doc->parseReferences<DOCTYPE::WORD_XML>();
-  }
+
 
   // testdir.parseAndConnect();
   
@@ -92,6 +92,18 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSwapBuffers(window);
   }
+
+  for( unsigned i = 0; i < testdir.size(); i++  ){
+    cout << "Printing Out BFS For Document " << testdir.getChild(i)->docname() << endl;
+    for( auto it = testdir.bfsbegin(i); it != testdir.bfsend(); ++it ){
+      cout << "\t" << it->docname() << endl;
+    }
+  }
+
+  // cout << "Printing out BFS iteration over document 0" << endl;
+  // for( auto it = testdir.bfsbegin(0); it != testdir.bfsend(); ++it ){
+  //   cout << it->filename() << endl;
+  // }
 
   // Shutdown ImGUI and Backend
   ImGui_ImplGlfw_Shutdown();
