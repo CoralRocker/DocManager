@@ -10,6 +10,8 @@
 // Display The Menu Bar
 bool menuBar();
 
+bool helpRefResolve();
+
 // Prompt User to tell if documents selected are correct
 bool correctDocPopUp(std::shared_ptr<document>, string, bool&);
 
@@ -18,3 +20,6 @@ bool graphWindow(docgraph&);
 
 // Go Through Resolving Reference Issues
 bool referenceWindow(docgraph&);
+
+// Loading Screen While Parsing Docs
+bool parseDocs(docgraph&);
