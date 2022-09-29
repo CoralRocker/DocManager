@@ -58,6 +58,7 @@ int main() {
   // testdir.parseAndConnect();
   
   static bool close = false;
+  bool parsed = false;
 
   // My Program
   while( !glfwWindowShouldClose(window) && !close){
@@ -68,12 +69,14 @@ int main() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    if( !parsed ){ // Parse/Load Documents First
+      parsed = parseDocs(testdir);
+    }else{ // Do work on parsed docs
+      // Actual Drawing Part
+      close = menuBar();
 
-    // Actual Drawing Part
-    close = menuBar();
-
-    close |= referenceWindow(testdir);
-
+      close |= referenceWindow(testdir);
+    }
 
 
     // Render Section
