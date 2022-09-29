@@ -51,3 +51,18 @@ $(TARGET): $(OBJS)
 	@$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
 
+#######################################
+# BACKEND LIBRARY COMPILATION         #
+#######################################
+
+impl_glfw_opengl2: lib/backends/imgui_impl_opengl2.cpp lib/backends/imgui_impl_glfw.cpp
+	@echo Building GLFW/OpenGL2 Backend Library
+	@$(CXX) $(CXXFLAGS) -c $^
+	@ar r lib/backends/lib$@.a *.o
+	@rm *.o
+
+imgui: lib/imgui.cpp lib/imgui_draw.cpp lib/imgui_tables.cpp lib/imgui_widgets.cpp
+	@echo Building Dear ImGui Library
+	@$(CXX) $(CXXFLAGS) -c $^
+	@ar r lib/lib$@.a *.o
+	@rm *.o
