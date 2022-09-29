@@ -8,3 +8,6 @@ build/
 
 # Valgrind Core Dumps 
 vgcore.*
+
+# Dear ImGui Configs
+imgui.ini
