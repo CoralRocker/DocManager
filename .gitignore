@@ -7,6 +7,9 @@ docmng
 # Build dir
 build/
 
+# Documentation
+Docs/
+
 # Valgrind Core Dumps 
 vgcore.*
 
