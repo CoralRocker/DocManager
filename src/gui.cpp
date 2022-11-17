@@ -257,7 +257,7 @@ bool referenceWindow(docgraph& graph) {
   float progress = (max - cur) / max; 
 
   std::stringstream progstr;
-  progstr << std::setprecision(0) << max-cur << "/" << max;
+  progstr << std::setprecision(0) << int(max-cur) << "/" << (int)max;
 
   ImGui::ProgressBar(progress, ImVec2(0.f, 0.f), progstr.str().c_str()); 
   ImGui::SameLine();
@@ -275,9 +275,10 @@ bool referenceWindow(docgraph& graph) {
     // Static Data
     static int current_ref_idx = 0;
 
-    // Get References
-    if( refs.empty() )
+    // Get References at start of each document
+    if( refs.empty() ) {
       refs = (*it)->getParsedReferences();
+    }
 
     // If References Don't Exist, Next Doc
     if( refs.empty() ){
@@ -339,11 +340,13 @@ bool referenceWindow(docgraph& graph) {
           confirm_doc = true;
         }
         
+        // Confirm that the document selected is correct
         if( confirm_doc ){
           bool selection;
+          // Display Popup asking for confirmation
           if( correctDocPopUp(poss_refs[poss_ref_idx], refs[current_ref_idx], selection) ){
             if( selection ){
-              (*it)->addReference(poss_refs[poss_ref_idx]);
+              (*it)->addReference(poss_refs[poss_ref_idx], refs[current_ref_idx]);
               poss_ref_idx = 0;
               poss_refs.clear();
               current_ref_idx++;

@@ -3,7 +3,10 @@
 #include <cstddef>
 #include <filesystem>
 #include <iterator>
+#include <fstream>
+#include <istream>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <iostream>
 #include <queue>
@@ -11,6 +14,7 @@
 #include <iterator>
 #include <type_traits>
 #include <set>
+#include <map>
 
 #include "document.hpp"
 #include "utils.hpp"
@@ -59,14 +63,16 @@ class docgraph {
       public:
 
       explicit _iterator(value_type root) : cur(root) {
+        visited = std::set<value_type>();
+        cont = Container();
         if( !root.get() )
           return;
         
         visited.insert(root);
 
         for( auto ref : root->references ){
-          if( visited.find(ref) == visited.end() ){
-            cont.push(ref);
+          if( visited.find(ref.getDoc()) == visited.end() ){
+            cont.push(ref.getDoc());
           }
         }
         //if( !root->references.empty() ){
@@ -118,11 +124,13 @@ class docgraph {
       _iterator& operator++() {
         if( cont.empty() ) { cur = nullptr; return *this; }
 
-        cur = pop();
+        cur = pop(); 
 
         for( auto ref : cur->references ) {
-          if( visited.find(ref) == visited.end() )
-            cont.push(ref);
+          if( visited.find(ref.getDoc()) == visited.end() ){
+            cont.push(ref.getDoc());
+            visited.insert(ref.getDoc());
+          }
         }
         return *this;
       }
@@ -134,8 +142,10 @@ class docgraph {
         cur = pop();
 
         for( auto ref : cur->references )
-          if( visited.find(ref) == visited.end() )
+          if( visited.find(ref.getDoc()) == visited.end() ) {
             cont.push(ref);
+            visited.insert(ref.getDoc());
+          }
         return result;
       }
 
@@ -198,5 +208,8 @@ class docgraph {
 
     const shared_ptr<document> getChild(size_t) const;
 
+    const vector<uint8_t> serialize() const;
+    
+    friend std::istream& operator>>(std::istream&,docgraph&);
+    friend std::ostream& operator<<(std::ostream&,docgraph&);
 };
-

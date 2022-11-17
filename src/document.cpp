@@ -2,8 +2,11 @@
 #include <algorithm>
 #include <bits/types/FILE.h>
 #include <cctype>
+#include <cstdint>
 #include <filesystem>
+#include <istream>
 #include <memory>
+#include <ostream>
 #include <regex>
 #include <stdexcept>
 #include <string_view>
@@ -19,7 +22,7 @@
  * @param file The path to the requested file
  * @param references A vector of share_ptrs to documents that the document references.    
  */                                                                                       
-document::document(path file, vector<shared_ptr<document>> references)                 
+document::document(path file, vector<reference> references)                 
   : references(references), file(file) {                                                  
   if( !std::filesystem::is_regular_file(file) )                                            
     throw std::invalid_argument("File path for document must be a regular file!: "+file.string());     
@@ -44,7 +47,7 @@ void document::printInfo() const {
 
       std::cout << "References: ";
       for( auto doc : references ){
-        std::cout << doc->filename() << ",";
+        std::cout << doc.getDoc()->filename() << ",";
       }
       std::cout << std::endl;
 }
@@ -90,9 +93,9 @@ bool document::getFileNameInfo() {
  *
  * @returns True if the reference was added, or false. 
  */
-bool document::addReference(shared_ptr<document> doc) {
+bool document::addReference(shared_ptr<document> doc, string refString) {
   if( !hasReference(doc) ) {
-    references.push_back(doc);
+    references.push_back(reference(doc, refString, doc->getDocID()));
     string lower_docname = doc->docname();
     std::transform(lower_docname.begin(), lower_docname.end(), lower_docname.begin(), ::tolower);
     for(auto it = unfound_references.begin(); it != unfound_references.end(); ++it){
@@ -125,7 +128,7 @@ bool document::hasReference(shared_ptr<document> doc) const {
 }
 bool document::hasReference(const document* doc) const {
   for( auto ref : references )
-    if( ref.get() == doc )
+    if( ref.getDoc().get() == doc )
       return true;
 
   return false;
@@ -170,4 +173,146 @@ void document::parseReferences() {
       break;
   }
 
+}
+std::istream& operator>>(std::istream& is, document& doc){
+  doc = document();
+  uint32_t size;
+
+  // Get Vector<document>
+  is.read((char*)&size, sizeof(size));
+
+  for( unsigned i = 0; i < size; i++ ){
+    reference ref;
+    is >> ref;
+    doc.__stream_documents.push_back(ref);
+  }
+
+  // Get Vector<String> UnFound References
+  is.read((char*)&size, sizeof(size));
+  for( unsigned i = 0; i < size; i++ ){
+    char c;
+    string tmp;
+    do {
+      tmp.push_back(c = is.get());
+    }while( c != 0 );
+    doc.unfound_references.push_back(tmp);
+  }
+
+  // Get Vector<String> parsed References
+  is.read((char*)&size, sizeof(size));
+  for( unsigned i = 0; i < size; i++ ){
+    char c;
+    string tmp;
+    do {
+      tmp.push_back(c = is.get());
+    }while( c != 0 );
+    doc.parsed_references.push_back(tmp);
+  }
+
+  // Get FilePath
+  char c;
+  string tmp;
+  do {
+    tmp.push_back(c = is.get());
+  }while( c != 0 );
+  doc.file = tmp;
+
+  // Get DOCID
+  DOCID id;
+  is >> id;
+  doc.subsys = (SUBSYSTEMS)id.SUBSYS;
+  doc.document_name = id.NAME;
+  doc.revision = id.REVISION;
+
+  return is;
+}
+
+std::ostream& operator<<(std::ostream& os, document& doc){
+  uint32_t size = doc.references.size();
+  os.write((char*)&size, sizeof(size));
+
+  // References
+  for( auto ref : doc.references ){
+    auto id = ref.getDoc()->getDocID();
+    os.write((char*)&id.SUBSYS, 1);
+    os.write((char*)&id.REVISION, 1);
+    os.write(id.NAME.c_str(), id.NAME.size());
+    char c = 0x00;
+    os.write(&c, 1);
+  }
+
+
+  // Unfound References
+  size = doc.unfound_references.size();
+  os.write((char*)&size, sizeof(size));
+
+  for( auto ref : doc.unfound_references ){
+    os.write(ref.c_str(), ref.size());
+  }
+
+  // Parsed References
+  size = doc.parsed_references.size();
+  os.write((char*)&size, sizeof(size));
+
+  for( auto ref : doc.parsed_references ){
+    os.write(ref.c_str(), ref.size());
+    char c = 0x00;
+    os.write(&c, 1);
+  }
+
+  // File Path
+  os.write(doc.file.c_str(), doc.file.string().size());
+  char c = 0x00;
+  os.write(&c, 1);
+  
+  // DOCID
+  os << doc.getDocID();
+                                                  
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, reference& ref) {
+  os << ref.id;
+
+  if( ref.getRef().empty() ){
+    char c = 0x00;
+    os.write(&c, 1);
+  }else{
+    os.write(ref.getRef().c_str(), ref.getRef().size());
+    char c = 0x00;
+    os.write(&c, 1);
+  }
+
+  return os;
+}
+
+std::istream& operator>>(std::istream& is, reference& ref) { 
+  ref = reference();
+
+  is >> ref.id;
+  char c;
+  do {
+    ref.ref_string.push_back(c = is.get());
+  } while( c != 0 );
+
+  return is;
+}
+
+std::istream& operator>>(std::istream& is, DOCID& id) {
+  is.read((char*)&id.SUBSYS, sizeof(id.SUBSYS));
+  is.read((char*)&id.REVISION, sizeof(id.REVISION));
+  char c;
+  id.NAME.clear();
+  do {
+    id.NAME.push_back(c = is.get());
+  } while( c != 0 );
+
+  return is;
+}
+
+std::ostream& operator<<(std::ostream& os, DOCID id) {
+  os.write((char*)&id.SUBSYS, sizeof(id.SUBSYS));
+  os.write((char*)&id.REVISION, sizeof(id.REVISION));
+  os.write(id.NAME.c_str(), id.NAME.size()+1);
+  return os;
 }

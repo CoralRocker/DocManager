@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
@@ -49,13 +50,32 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL2_Init();
 
+  bool loadFromFile = false;
+  string filename = "test.graph";
+  string dirname = "./SimpleTestDir";
 
   docgraph testdir;
-  testdir.scan_dir("test_dir");
+
+  if( std::filesystem::exists(filename) ){
+    std::cout << "Loading test graph" << std::endl;
+    std::ifstream gfile(filename, std::ios::binary);
+    gfile >> testdir;
+    gfile.close();
+    loadFromFile = true;
+  }
+
+  for( unsigned i = 0; i < testdir.size(); i++  ){
+    cout << "Printing Out BFS For Document " << testdir.getChild(i)->docname() << endl;
+    for( auto it = testdir.bfsbegin(i); it != testdir.bfsend(); ++it ){
+      cout << "\t" << it->docname() << endl;
+    }
+  }
+
+  if( !loadFromFile ){
+    testdir.scan_dir(dirname);
+    testdir.parseAndConnect();
+  }
   
-
-
-  // testdir.parseAndConnect();
   
   static bool close = false;
   bool parsed = false;
@@ -100,11 +120,6 @@ int main() {
     }
   }
 
-  // cout << "Printing out BFS iteration over document 0" << endl;
-  // for( auto it = testdir.bfsbegin(0); it != testdir.bfsend(); ++it ){
-  //   cout << it->filename() << endl;
-  // }
-
   // Shutdown ImGUI and Backend
   ImGui_ImplGlfw_Shutdown();
   ImGui_ImplOpenGL2_Shutdown();
@@ -112,6 +127,12 @@ int main() {
 
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  if( !loadFromFile ) {
+    std::ofstream gfile("test.graph", std::ios::binary);
+    gfile << testdir;
+
+  }
 
 
 }

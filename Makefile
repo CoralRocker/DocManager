@@ -1,5 +1,5 @@
 # Compiler to use
-CXX=clang++
+CXX=g++
 
 # Flags to give to compiler.
 # Add or remove flags as needed

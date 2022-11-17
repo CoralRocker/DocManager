@@ -2,10 +2,17 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <iostream>
 #include <string>
+#include <string_view>
+
+#include <set>
+#include <algorithm>
+#include <vector>
+
 namespace fs = std::filesystem;
 
 /**
@@ -79,4 +86,37 @@ std::optional<path> unzip_file(path zipfile, string subfile) {
     return std::nullopt;
 
   return enddir;
+}
+
+std::istream& readCString(std::istream& is, std::string& str) {
+  char c;
+  do {
+    c = is.get();
+    if( c != 0 )
+      str.push_back(c); 
+  } while( c != 0 );
+
+  return is;
+}
+
+float string_similarity(std::string s1, std::string s2) {
+  std::vector<std::string> s1_pairs, s2_pairs;
+
+  for( unsigned i = 0; i < (s1.size()-1); i++ ){
+    s1_pairs.push_back(s1.substr(i, 2));
+  }
+
+  for( unsigned i = 0; i < (s2.size()-1); i++ ){
+    s2_pairs.push_back(s2.substr(i,2));
+  }
+
+  std::sort(s1_pairs.begin(), s1_pairs.end());
+  std::sort(s2_pairs.begin(), s2_pairs.end());
+
+  std::vector<std::string> intersect;
+  std::set_intersection(s1_pairs.begin(), s1_pairs.end(),
+                        s2_pairs.begin(), s2_pairs.end(),
+                        std::back_inserter(intersect));
+
+  return 2.f * intersect.size() / (s1_pairs.size() + s2_pairs.size());
 }
